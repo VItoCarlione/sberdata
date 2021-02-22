@@ -1,9 +1,18 @@
 ---
-- hosts: all
+- hosts: nginxservers
+  become: True
   tasks:
-    - name: ensure nginx is at the latest version
-      apt: name=nginx state=latest
+    - name: Install Nginx latest version
+      apt: 
+        name: "nginx" 
+        state: "latest"
     - name: start nginx
       service:
-          name: nginx
-          state: started
+        name: nginx
+        state: started
+        enabled: True
+    - name: Deploy static website
+      copy:
+        src: index.html
+        dest: /var/www/html/
+...
