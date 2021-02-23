@@ -1,13 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage ('SCM Chekout') {
-            steps{
-                git branch: 'main', url: 'https://github.com/VItoCarlione/sberdata'
-                
-            }
-            
-        }
         stage ('Проверка Hadoop Service') {
             steps {
                 parallel (
