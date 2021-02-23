@@ -20,7 +20,7 @@ pipeline {
                     },
                     'Проверка доступности Hadoop DataNodes': {
                         script {
-                            final String url = "http://87.239.109.237:9864/"
+                            final String url = "http://87.239.109.237:986/"
                             final def String code =
                                 sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
                                 echo "HTTP response status code: $code"
