@@ -13,8 +13,9 @@ pipeline {
 
                         if (code == 200) {
                             sh ‘exit 0’
+                            
                         }  
-            }
+                }
         }
         stage('Ansible Exec'){
             steps{
