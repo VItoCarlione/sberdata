@@ -6,13 +6,13 @@ pipeline {
                 parallel (
                     'Проверка доступности Hadoop NameNode': {
                         script{
-                            final String url = "http://87.239.109.237:9870/"
-                            final def String code =
-                                sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
-                                echo "HTTP response status code: $code"
-                                if (code == 200){
-                                    sh ‘exit 0’
-                                    
+                            def String url = "http://87.239.109.237:9870/"
+                            def String statusCode = sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                                if (statusCode != "200"){
+                                            echo "HTTP response status code: $statusCode"
+                                            echo '[FAILURE] Failed to build'
+                                            currentBuild.result = 'FAILURE'
+                                            throw new Exception("Throw to stop pipeline")
                                 }
                             
                         }
@@ -20,14 +20,15 @@ pipeline {
                     },
                     'Проверка доступности Hadoop DataNodes': {
                         script {
-                            final String url = "http://87.239.109.237:986/"
-                            final def String code =
-                                sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
-                                echo "HTTP response status code: $code"
-                                if (code == 200){
-                                    sh ‘exit 0’
+                            def String url = "http://87.239.109.237:9864/"
+                            def String statusCode2 = sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                                if (statusCode2 != "200"){
+                                    echo "HTTP response status code: $statusCode2"
+                                    echo '[FAILURE] Failed to build'
+                                    currentBuild.result = 'FAILURE'
+                                    throw new Exception("Throw to stop pipeline")
                                     
-                                }
+                                } 
                             }
                         }
                     )
