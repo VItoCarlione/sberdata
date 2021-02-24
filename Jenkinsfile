@@ -7,7 +7,7 @@ pipeline {
                     'Проверка доступности Hadoop NameNode': {
                         script{
                             def String url = "http://87.239.109.237:9870/"
-                            def String statusCode = sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                            def String statusCode = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
                                 if (statusCode != "200"){
                                             echo "HTTP response status code: $statusCode"
                                             echo '[FAILURE] Failed to build'
@@ -21,7 +21,7 @@ pipeline {
                     'Проверка доступности Hadoop DataNodes': {
                         script {
                             def String url = "http://87.239.109.237:9864/"
-                            def String statusCode2 = sh(script: "curl -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                            def String statusCode2 = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
                                 if (statusCode2 != "200"){
                                     echo "HTTP response status code: $statusCode2"
                                     echo '[FAILURE] Failed to build'
