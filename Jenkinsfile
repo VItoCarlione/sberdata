@@ -8,8 +8,8 @@ pipeline {
                         script{
                             def String url = "http://87.239.109.237:9870/"
                             def String statusCode = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                                echo "HTTP response status code: $statusCode"
                                 if (statusCode != "200"){
-                                            echo "HTTP response status code: $statusCode"
                                             echo '[FAILURE] Failed to build'
                                             currentBuild.result = 'FAILURE'
                                             throw new Exception("Throw to stop pipeline")
@@ -22,8 +22,8 @@ pipeline {
                         script {
                             def String url = "http://87.239.109.237:9864/"
                             def String statusCode2 = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
+                                echo "HTTP response status code: $statusCode2"
                                 if (statusCode2 != "200"){
-                                    echo "HTTP response status code: $statusCode2"
                                     echo '[FAILURE] Failed to build'
                                     currentBuild.result = 'FAILURE'
                                     throw new Exception("Throw to stop pipeline")
