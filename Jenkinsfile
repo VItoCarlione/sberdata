@@ -34,7 +34,7 @@ pipeline {
                     )
                 }
             }
-            stage('Установка Ngonx с помощью Ansible') {
+            stage('Установка Nginx с помощью Ansible') {
                 steps{
                     ansiblePlaybook become: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible3', inventory: 'dev.inv', playbook: 'nginx.yml'
                     
