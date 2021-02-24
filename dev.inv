@@ -1,2 +1,2 @@
 [nginxservers]
-87.239.109.136 ansible_user=ubuntu
+87.239.108.24 ansible_user=ubuntu
