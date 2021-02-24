@@ -15,12 +15,14 @@ pipeline {
                             def String url = "http://87.239.109.237:9870/" // Адрес NameNode UI, передается в переменную $url, в виде строкового значения
                             def String statusCode = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim() /* Запрос данных 
                             через curl c параметрами максимальной длительности коннекта в 10 секунд, если ответа нет этап завершиться с ошибкой, если этого не делать
-                            crul будет висеть очень долго в ожидании. head позволяет нам взять первые строки из вывода, с помощью cut образаем нужный статус код*/
-                                echo "HTTP response status code: $statusCode"
-                                if (statusCode != "200"){
-                                            echo '[FAILURE] Failed to build'
-                                            currentBuild.result = 'FAILURE'
-                                            throw new Exception("Pipeline остановлен виду неуспешного завершения шага!")
+                            crul будет висеть очень долго в ожидании. head позволяет нам взять первые строки из вывода, с помощью cut образаем нужный статус код
+                            returnStdout: true - 
+                            .trim() -      */
+                                echo "HTTP response status code: $statusCode" // Смотрим какой код вернула страничка
+                                if (statusCode != "200"){ // Условный блок через который задаем условие, что если полученный код не равняется 200 (http OK), то выводим инфу о сбое
+                                            echo '[FAILURE] Failed to build' // Выводим сообщение о сбое
+                                            currentBuild.result = 'FAILURE' // Объяляем что сборка зафэйлилась
+                                            throw new Exception("Pipeline остановлен виду неуспешного завершения шага!") // Обрабатываем исключение, через него делаем остановку pipeline
                                 }
                             
                         }
@@ -29,12 +31,12 @@ pipeline {
                     'Проверка доступности Hadoop DataNodes': { // Объявляем название подэтапа
                         script { // см. выше
                             def String url = "http://87.239.109.237:9864/" // Адрес DataNode UI
-                            def String statusCode2 = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim()
-                                echo "HTTP response status code: $statusCode2"
-                                if (statusCode2 != "200"){
-                                    echo '[FAILURE] Failed to build'
-                                    currentBuild.result = 'FAILURE'
-                                    throw new Exception("Pipeline остановлен виду неуспешного завершения шага!")
+                            def String statusCode2 = sh(script: "curl --max-time 10 -I $url 2>/dev/null | head -n 1 | cut -d ' ' -f2", returnStdout: true).trim() // см. выше пред подэтап
+                                echo "HTTP response status code: $statusCode2" // см. выше пред подэтап
+                                if (statusCode2 != "200"){ // см. выше пред подэтап
+                                    echo '[FAILURE] Failed to build' // см. выше пред подэтап
+                                    currentBuild.result = 'FAILURE' // см. выше пред подэтап
+                                    throw new Exception("Pipeline остановлен виду неуспешного завершения шага!") // см. выше пред подэтап
                                     
                                 } 
                             }
@@ -42,14 +44,14 @@ pipeline {
                     )
                 }
             }
-            stage('Установка Nginx с помощью Ansible') {
-                steps{
+            stage('Установка Nginx с помощью Ansible') { // Блок 2: Устанавливаем Nginx на удаленный сервер с помощью Ansible
+                steps{ // Шаг 1
                     ansiblePlaybook become: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible3', inventory: 'dev.inv', playbook: 'nginx.yml'
                     // Запуск playbook хранящегося в репозитории на GitHub, при этом Ansible подключается по SSH ключу
                 }
                 
             }
-            stage('Проверка доступности Nginx') {
+            stage('Проверка доступности Nginx') { // Блок 3: Проверка доступности HTML странички.
                 steps{
                     sh 'curl 87.239.109.136:80' // Запрос стартовой странички Nginx, простой вариант проверки без условий
                     
