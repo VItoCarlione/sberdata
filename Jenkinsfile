@@ -1,6 +1,7 @@
 /*
 Pipeline Jenkins для проверки доступности сервисов Hadoop кластера, установки Nginx и проверки его доступности. В целом выполнен в декларативном формате, с элементами шагов 
 в скриптовом формате (устаревший формат).
+Установленные плагины: Blue Ocean для визуализации, SSH плагин
 */
 
 pipeline {
@@ -43,7 +44,19 @@ pipeline {
                         } /* В блок parallel в части проверки hdfs добавлен подэтап с проверкой hdfs fsck / через удаленное выполнение команд через SSH плагин         
                     Блок пока закомментирован так как сбоил, нужно еще время чтобы доработать. Альтернативным способом проверки целостности hdfs рассмаривался запрос curl'ом странички
                     с информацией о статус http://87.239.109.237:9870/fsck?ugi=hdoop&path=%2F (%2F = /   urlencode)
-                    
+                    'Проверка целостности hdfs': { 
+                        script {
+                            def remote = [:]
+                            remote.name = "Hadoop_MCS"
+                            remote.host = "87.239.109.237"
+                            remote.allowAnyHosts = true
+                                withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu', keyFileVariable: 'priv_key', passphraseVariable: '', usernameVariable: 'ubuntu')]) {
+                                    remote.user = ubuntu
+                                    remote.identityFile = priv_key
+                                        sshCommand remote: remote, command: 'hdfs fsck / | tail -n 1 | grep -oE '[^ ]+$'' // Берем вывод команды, читаем последнюю где есть инфа
+                                        о состоянии, грепаем последнее слово из строки, так как статус расположен в этой позиции
+                        }
+                    }                 
                     
                     */
                     )
@@ -52,7 +65,7 @@ pipeline {
             stage('Установка Nginx с помощью Ansible') { // Блок 2: Устанавливаем Nginx на удаленный сервер с помощью Ansible
                 steps{ // Шаг 1
                     ansiblePlaybook become: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible3', inventory: 'dev.inv', playbook: 'nginx.yml'
-                    // Запуск playbook хранящегося в репозитории на GitHub, при этом Ansible подключается по SSH ключу
+                    // Запуск playbook хранящегося в репозитории на GitHub, при этом Ansible подключается по SSH ключу, с повыш привилегиями через become
                 }
                 
             }
